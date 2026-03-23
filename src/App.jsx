@@ -1,11 +1,10 @@
-import { useState } from 'react'
-
+import AppRoutes from "./routes/AppRoutes";
 function App() {
+
   return (
-    <div className='flex justify-center item-center'>
-      <h1>School management</h1>
-    </div>
-  )
+
+    <AppRoutes />
+  );
 }
 
-export default App
+export default App;
