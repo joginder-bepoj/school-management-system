@@ -6,7 +6,8 @@ import AdminLayout from "../components/layout/AdminLayout";
 const Login = lazy(() => import("../features/auth/Login"));
 const SchoolSetup = lazy(() => import("../pages/SchoolSetup"));
 
-// Lazy load pages
+// Lazy load pagest
+const SchoolSelector = lazy(() => import("../pages/SchoolSelector"));
 const AdminDashboard = lazy(() => import("../components/layout/AdminDashboard"));
 const School = lazy(() => import("../pages/School"));
 const Teachers = lazy(() => import("../pages/Teachers"));
@@ -20,7 +21,16 @@ const ApplicationReview = lazy(() => import("../pages/enrollment/ApplicationRevi
 
 // Students
 const StudentList = lazy(() => import("../pages/students/StudentList"));
+const AddStudent = lazy(() => import("../pages/students/AddStudent"));
+const EditStudent = lazy(() => import("../pages/students/EditStudent"));
 const StudentProfile = lazy(() => import("../pages/students/StudentProfile"));
+const StudentAttendance = lazy(() => import("../pages/students/Attendance"));
+
+// Classes
+const ClassList = lazy(() => import("../pages/classes/ClassList"));
+const AddClass = lazy(() => import("../pages/classes/AddClass"));
+const EditClass = lazy(() => import("../pages/classes/EditClass"));
+const ClassProfile = lazy(() => import("../pages/classes/ClassProfile"));
 
 // Staff
 const StaffList = lazy(() => import("../pages/staff/StaffList"));
@@ -81,11 +91,18 @@ const AnimatedRoutes = () => {
         </ProtectedRoute>
       } />
 
+      {/* School Selector — shown after login */}
+      <Route path="/select-school" element={
+        <ProtectedRoute>
+          <PageTransition><SchoolSelector /></PageTransition>
+        </ProtectedRoute>
+      } />
+
       {/* Dashboard Routes */}
       <Route path="/" element={
         <ProtectedRoute><AdminLayout /></ProtectedRoute>
       }>
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<Navigate to="/select-school" replace />} />
         <Route path="dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
         <Route path="school" element={<PageTransition><School /></PageTransition>} />
         <Route path="add-school" element={<PageTransition><AddSchools /></PageTransition>} />
@@ -100,7 +117,16 @@ const AnimatedRoutes = () => {
 
         {/* Students */}
         <Route path="students" element={<PageTransition><StudentList /></PageTransition>} />
+        <Route path="students/add" element={<PageTransition><AddStudent /></PageTransition>} />
+        <Route path="students/edit/:studentId" element={<PageTransition><EditStudent /></PageTransition>} />
+        <Route path="students/attendance" element={<PageTransition><StudentAttendance /></PageTransition>} />
         <Route path="students/:studentId" element={<PageTransition><StudentProfile /></PageTransition>} />
+
+        {/* Classes */}
+        <Route path="classes" element={<PageTransition><ClassList /></PageTransition>} />
+        <Route path="classes/add" element={<PageTransition><AddClass /></PageTransition>} />
+        <Route path="classes/edit/:classId" element={<PageTransition><EditClass /></PageTransition>} />
+        <Route path="classes/:classId" element={<PageTransition><ClassProfile /></PageTransition>} />
 
         {/* Staff */}
         <Route path="staff" element={<PageTransition><StaffList /></PageTransition>} />

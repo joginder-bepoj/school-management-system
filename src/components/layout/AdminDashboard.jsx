@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BiSolidSchool } from "react-icons/bi";
 import { FaChalkboardTeacher, FaUserTie, FaMoneyBillWave, FaCalendarAlt } from "react-icons/fa";
 import { PiStudent } from "react-icons/pi";
@@ -36,7 +36,17 @@ const StatCard = ({ icon, label, value, color, trend, trendValue, delay }) => (
 );
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [revenueView] = useState("monthly");
+
+  // Get selected school from localStorage
+  const selectedSchool = JSON.parse(localStorage.getItem("selectedSchool") || "null");
+
+  // If no school selected, redirect to school selector
+  if (!selectedSchool) {
+    navigate("/select-school", { replace: true });
+    return null;
+  }
 
   const activityIcons = {
     student: <PiStudent className="text-blue-500" />,
@@ -62,8 +72,16 @@ const AdminDashboard = () => {
       {/* Page Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-          <p className="text-sm text-slate-500">Welcome back! Here&apos;s your school overview.</p>
+          <h1 className="text-2xl font-bold text-slate-800">{selectedSchool.schoolName}</h1>
+          <p className="text-sm text-slate-500">
+            {selectedSchool.address.city}, {selectedSchool.address.state} — {selectedSchool.label} · {selectedSchool.type}
+          </p>
+          <button
+            onClick={() => navigate("/select-school")}
+            className="text-xs text-blue-600 font-medium hover:underline mt-1 cursor-pointer"
+          >
+            ← Switch School
+          </button>
         </div>
         <div className="flex gap-2">
           {quickActions.slice(0, 3).map((action) => (
@@ -85,22 +103,22 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-4 gap-4">
         <StatCard
           icon={<BiSolidSchool className="text-2xl text-amber-500" />}
-          label="Total Schools"
-          value={dashboardStats.totalSchools}
+          label="School Code"
+          value={selectedSchool.schoolCode}
           color={{ bg: "bg-amber-50", text: "text-amber-600" }}
-          trend="up" trendValue="2%" delay="delay-1"
+          delay="delay-1"
         />
         <StatCard
           icon={<PiStudent className="text-2xl text-blue-500" />}
           label="Total Students"
-          value={dashboardStats.totalStudents.toLocaleString()}
+          value={selectedSchool.totalStudents.toLocaleString()}
           color={{ bg: "bg-blue-50", text: "text-blue-600" }}
           trend="up" trendValue="8%" delay="delay-2"
         />
         <StatCard
           icon={<FaChalkboardTeacher className="text-2xl text-indigo-500" />}
           label="Total Teachers"
-          value={dashboardStats.totalTeachers}
+          value={selectedSchool.totalTeachers}
           color={{ bg: "bg-indigo-50", text: "text-indigo-600" }}
           trend="up" trendValue="4%" delay="delay-3"
         />
@@ -192,17 +210,17 @@ const AdminDashboard = () => {
             <h3 className="text-lg font-bold text-slate-700">Monthly Revenue</h3>
             <span className="text-xs text-slate-400 uppercase px-2 py-1 bg-slate-50 rounded-md">{revenueView}</span>
           </div>
-          <div className="flex items-end gap-1.5 h-40">
+          <div className="flex items-end gap-1.5" style={{ height: "160px" }}>
             {monthlyRevenue.map((m) => (
-              <div key={m.month} className="flex-1 flex flex-col items-center gap-1 group">
-                <div className="w-full flex flex-col items-center gap-0.5" style={{ height: "130px" }}>
+              <div key={m.month} className="flex-1 flex flex-col items-center group" style={{ height: "100%" }}>
+                <span className="text-[10px] text-slate-400 font-medium group-hover:text-blue-600 transition-colors mb-1">{m.month}</span>
+                <div className="w-full flex-1 flex flex-col justify-end">
                   <div
-                    className="w-full bg-blue-200 rounded-t-sm transition-all duration-300 group-hover:bg-blue-500"
+                    className="w-full bg-blue-200 rounded-t-md transition-all duration-300 group-hover:bg-blue-500"
                     style={{ height: `${(m.revenue / 520000) * 100}%`, minHeight: "4px" }}
-                    title={`Due: Rs.${(m.revenue / 1000).toFixed(0)}K`}
+                    title={`Rs.${(m.revenue / 1000).toFixed(0)}K`}
                   ></div>
                 </div>
-                <span className="text-[10px] text-slate-400 group-hover:text-blue-600 transition-colors">{m.month}</span>
               </div>
             ))}
           </div>
@@ -267,20 +285,6 @@ const AdminDashboard = () => {
             ))}
           </div>
 
-          {/* Quick Enrollment Stats */}
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <h4 className="text-sm font-semibold text-slate-600 mb-2">Enrollment Status</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-center p-2 bg-blue-50 rounded-lg">
-                <p className="text-lg font-bold text-blue-600">{dashboardStats.newAdmissions}</p>
-                <p className="text-xs text-slate-500">New This Month</p>
-              </div>
-              <div className="text-center p-2 bg-amber-50 rounded-lg">
-                <p className="text-lg font-bold text-amber-600">6</p>
-                <p className="text-xs text-slate-500">Pending Review</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

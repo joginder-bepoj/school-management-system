@@ -1,60 +1,35 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { IoSearch } from "react-icons/io5";
-import { MdFilterList, MdPersonAdd, MdEdit, MdDelete } from "react-icons/md";
-import { FaEye } from "react-icons/fa";
-import { students } from "../../data/students";
+import { MdFilterList, MdAdd, MdEdit, MdDelete, MdClass, MdPeople, MdRoom, MdAccessTime } from "react-icons/md";
+import { FaEye, FaChalkboardTeacher } from "react-icons/fa";
+import { classes } from "../../data/classes";
 import { toast } from "react-toastify";
 
-const StatusBadge = ({ status }) => {
-  const colors = {
-    Active: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    Inactive: "bg-slate-50 text-slate-500 border-slate-200",
-    Transferred: "bg-orange-50 text-orange-600 border-orange-200",
-    Alumni: "bg-blue-50 text-blue-600 border-blue-200",
-  };
-  return (
-    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${colors[status] || "bg-slate-50 text-slate-600"}`}>
-      {status}
-    </span>
-  );
-};
+const StatusBadge = ({ status }) => (
+  <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
+    status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"
+  }`}>
+    {status}
+  </span>
+);
 
-const FeeBadge = ({ status }) => {
-  const colors = {
-    Clear: "text-emerald-600 bg-emerald-50",
-    Due: "text-amber-600 bg-amber-50",
-    Overdue: "text-red-600 bg-red-50",
-  };
-  return (
-    <span className={`px-2 py-0.5 text-xs font-semibold rounded ${colors[status] || "text-slate-600 bg-slate-50"}`}>
-      {status === "Clear" ? "No Dues" : status}
-    </span>
-  );
-};
-
-const DeleteModal = ({ student, onConfirm, onCancel }) => (
+const DeleteModal = ({ cls, onConfirm, onCancel }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
     <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 animate-slide-up">
       <div className="flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mx-auto mb-4">
         <MdDelete className="text-3xl text-red-500" />
       </div>
-      <h3 className="text-lg font-bold text-slate-800 text-center">Delete Student?</h3>
+      <h3 className="text-lg font-bold text-slate-800 text-center">Delete Class?</h3>
       <p className="text-sm text-slate-500 text-center mt-2">
-        Are you sure you want to delete <span className="font-semibold text-slate-700">{student.personalInfo.fullName}</span> ({student.id})?
-        This action cannot be undone.
+        Are you sure you want to delete <span className="font-semibold text-slate-700">{cls.className} - {cls.section}</span>?
+        This will affect {cls.totalStudents} students. This action cannot be undone.
       </p>
       <div className="flex gap-3 mt-6">
-        <button
-          onClick={onCancel}
-          className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
-        >
+        <button onClick={onCancel} className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all cursor-pointer">
           Cancel
         </button>
-        <button
-          onClick={onConfirm}
-          className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25 transition-all cursor-pointer"
-        >
+        <button onClick={onConfirm} className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25 transition-all cursor-pointer">
           Yes, Delete
         </button>
       </div>
@@ -62,91 +37,107 @@ const DeleteModal = ({ student, onConfirm, onCancel }) => (
   </div>
 );
 
-const StudentList = () => {
+const ClassList = () => {
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("All");
   const [sectionFilter, setSectionFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const allClasses = [...new Set(students.map((s) => s.academicInfo.currentClass))].sort();
-  const allSections = [...new Set(students.map((s) => s.academicInfo.section))].sort();
+  const allClassNames = [...new Set(classes.map((c) => c.className))].sort((a, b) => {
+    const order = ["Nursery", "LKG", "UKG"];
+    const aIdx = order.indexOf(a);
+    const bIdx = order.indexOf(b);
+    if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+    if (aIdx !== -1) return -1;
+    if (bIdx !== -1) return 1;
+    const aNum = parseInt(a.replace("Class ", ""));
+    const bNum = parseInt(b.replace("Class ", ""));
+    return aNum - bNum;
+  });
+  const allSections = [...new Set(classes.map((c) => c.section))].sort();
 
-  const filtered = students.filter((s) => {
+  const filtered = classes.filter((c) => {
     const matchSearch =
-      s.personalInfo.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      s.id.toLowerCase().includes(search.toLowerCase());
-    const matchClass = classFilter === "All" || s.academicInfo.currentClass === classFilter;
-    const matchSection = sectionFilter === "All" || s.academicInfo.section === sectionFilter;
-    const matchStatus = statusFilter === "All" || s.status === statusFilter;
+      c.className.toLowerCase().includes(search.toLowerCase()) ||
+      c.classTeacher.toLowerCase().includes(search.toLowerCase()) ||
+      c.id.toLowerCase().includes(search.toLowerCase());
+    const matchClass = classFilter === "All" || c.className === classFilter;
+    const matchSection = sectionFilter === "All" || c.section === sectionFilter;
+    const matchStatus = statusFilter === "All" || c.status === statusFilter;
     return matchSearch && matchClass && matchSection && matchStatus;
   });
 
-  const handleDelete = (student) => {
-    setDeleteTarget(student);
-  };
-
   const confirmDelete = () => {
-    toast.success(`${deleteTarget.personalInfo.fullName} has been deleted`);
+    toast.success(`${deleteTarget.className} - ${deleteTarget.section} has been deleted`);
     setDeleteTarget(null);
   };
 
+  const totalStudents = classes.reduce((sum, c) => sum + c.totalStudents, 0);
+  const activeClasses = classes.filter((c) => c.status === "Active").length;
+
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {deleteTarget && (
-        <DeleteModal
-          student={deleteTarget}
-          onConfirm={confirmDelete}
-          onCancel={() => setDeleteTarget(null)}
-        />
+        <DeleteModal cls={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)} />
       )}
 
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Students</h1>
-          <p className="text-sm text-slate-500">{students.length} total students across all classes</p>
+          <h1 className="text-2xl font-bold text-slate-800">Classes</h1>
+          <p className="text-sm text-slate-500">{classes.length} total classes across all sections</p>
         </div>
         <Link
-          to="/students/add"
+          to="/classes/add"
           className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
         >
-          <MdPersonAdd className="text-xl" />
-          Add Student
+          <MdAdd className="text-xl" />
+          Add Class
         </Link>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm card-hover animate-slide-up delay-1">
-          <p className="text-sm text-slate-500">Active</p>
-          <p className="text-2xl font-bold text-emerald-600">{students.filter((s) => s.status === "Active").length}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <MdClass className="text-blue-500" />
+            <span className="text-sm text-slate-500">Total Classes</span>
+          </div>
+          <p className="text-2xl font-bold text-blue-600">{classes.length}</p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm card-hover animate-slide-up delay-2">
-          <p className="text-sm text-slate-500">Fee Clear</p>
-          <p className="text-2xl font-bold text-blue-600">{students.filter((s) => s.feeStatus === "Clear").length}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <MdPeople className="text-emerald-500" />
+            <span className="text-sm text-slate-500">Active Classes</span>
+          </div>
+          <p className="text-2xl font-bold text-emerald-600">{activeClasses}</p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm card-hover animate-slide-up delay-3">
-          <p className="text-sm text-slate-500">Fee Overdue</p>
-          <p className="text-2xl font-bold text-red-600">{students.filter((s) => s.feeStatus === "Overdue").length}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <MdPeople className="text-indigo-500" />
+            <span className="text-sm text-slate-500">Total Students</span>
+          </div>
+          <p className="text-2xl font-bold text-indigo-600">{totalStudents}</p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm card-hover animate-slide-up delay-4">
-          <p className="text-sm text-slate-500">Avg Attendance</p>
-          <p className="text-2xl font-bold text-indigo-600">
-            {(students.reduce((acc, s) => acc + s.attendancePercent, 0) / students.length).toFixed(1)}%
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <FaChalkboardTeacher className="text-violet-500" />
+            <span className="text-sm text-slate-500">Unique Sections</span>
+          </div>
+          <p className="text-2xl font-bold text-violet-600">{allSections.length}</p>
         </div>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar + Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm animate-slide-up delay-3">
         <div className="flex items-center gap-3 p-4 border-b border-slate-100">
           <div className="relative flex-1">
             <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by name or student ID..."
+              placeholder="Search by class name, teacher, or ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
@@ -160,7 +151,7 @@ const StudentList = () => {
               className="pl-9 pr-8 py-2 text-sm border border-slate-200 rounded-lg appearance-none focus:outline-none focus:border-blue-400 bg-white cursor-pointer"
             >
               <option value="All">All Classes</option>
-              {allClasses.map((cls) => (
+              {allClassNames.map((cls) => (
                 <option key={cls} value={cls}>{cls}</option>
               ))}
             </select>
@@ -183,8 +174,6 @@ const StudentList = () => {
             <option value="All">All Status</option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
-            <option value="Transferred">Transferred</option>
-            <option value="Alumni">Alumni</option>
           </select>
         </div>
 
@@ -193,68 +182,72 @@ const StudentList = () => {
           <table className="w-full">
             <thead>
               <tr className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50/80">
-                <th className="px-5 py-3">Student</th>
+                <th className="px-5 py-3">Class & Section</th>
                 <th className="px-5 py-3">ID</th>
-                <th className="px-5 py-3">Class</th>
-                <th className="px-5 py-3">Guardian</th>
-                <th className="px-5 py-3">Attendance</th>
-                <th className="px-5 py-3">Fee</th>
+                <th className="px-5 py-3">Class Teacher</th>
+                <th className="px-5 py-3">Students</th>
+                <th className="px-5 py-3">Room</th>
+                <th className="px-5 py-3">Schedule</th>
                 <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Action</th>
+                <th className="px-5 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filtered.map((student) => (
-                <tr key={student.id} className="hover:bg-blue-50/30 transition-colors">
+              {filtered.map((cls) => (
+                <tr key={cls.id} className="hover:bg-blue-50/30 transition-colors">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                        {student.personalInfo.fullName.split(" ").map((n) => n[0]).join("")}
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                        {cls.section}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">{student.personalInfo.fullName}</p>
-                        <p className="text-xs text-slate-400">{student.personalInfo.gender} &bull; {student.personalInfo.bloodGroup}</p>
+                        <p className="text-sm font-semibold text-slate-800">{cls.className}</p>
+                        <p className="text-xs text-slate-400">Section {cls.section}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-sm font-mono text-blue-600">{student.id}</td>
+                  <td className="px-5 py-3 text-sm font-mono text-blue-600">{cls.id}</td>
                   <td className="px-5 py-3">
-                    <p className="text-sm font-medium text-slate-700">{student.academicInfo.currentClass}-{student.academicInfo.section}</p>
-                    <p className="text-xs text-slate-400">Roll #{student.academicInfo.rollNumber}</p>
-                  </td>
-                  <td className="px-5 py-3">
-                    <p className="text-sm text-slate-700">{student.guardianInfo.father.name}</p>
-                    <p className="text-xs text-slate-400">{student.guardianInfo.father.mobile}</p>
+                    <div className="flex items-center gap-2">
+                      <FaChalkboardTeacher className="text-slate-400 text-sm" />
+                      <span className="text-sm text-slate-700">{cls.classTeacher}</span>
+                    </div>
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-12 bg-slate-100 rounded-full h-1.5">
-                        <div
-                          className={`h-1.5 rounded-full transition-all duration-500 ${student.attendancePercent >= 90 ? "bg-emerald-500" : student.attendancePercent >= 75 ? "bg-amber-500" : "bg-red-500"}`}
-                          style={{ width: `${student.attendancePercent}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs font-semibold text-slate-600">{student.attendancePercent}%</span>
+                      <MdPeople className="text-blue-400" />
+                      <span className="text-sm font-semibold text-slate-700">{cls.totalStudents}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-3"><FeeBadge status={student.feeStatus} /></td>
-                  <td className="px-5 py-3"><StatusBadge status={student.status} /></td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <MdRoom className="text-slate-400 text-sm" />
+                      <span className="text-sm text-slate-600">{cls.room}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <MdAccessTime className="text-slate-400 text-sm" />
+                      <span className="text-xs text-slate-600">{cls.schedule}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3"><StatusBadge status={cls.status} /></td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-1.5">
                       <Link
-                        to={`/students/${student.id}`}
+                        to={`/classes/${cls.id}`}
                         className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 px-2.5 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-200"
                       >
                         <FaEye /> View
                       </Link>
                       <Link
-                        to={`/students/edit/${student.id}`}
+                        to={`/classes/edit/${cls.id}`}
                         className="flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-800 px-2.5 py-1.5 bg-amber-50 rounded-lg hover:bg-amber-100 transition-all duration-200"
                       >
                         <MdEdit /> Edit
                       </Link>
                       <button
-                        onClick={() => handleDelete(student)}
+                        onClick={() => setDeleteTarget(cls)}
                         className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800 px-2.5 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-all duration-200 cursor-pointer"
                       >
                         <MdDelete /> Delete
@@ -266,7 +259,7 @@ const StudentList = () => {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <p className="text-center text-slate-400 py-8">No students found.</p>
+            <p className="text-center text-slate-400 py-8">No classes found.</p>
           )}
         </div>
       </div>
@@ -274,4 +267,4 @@ const StudentList = () => {
   );
 };
 
-export default StudentList;
+export default ClassList;

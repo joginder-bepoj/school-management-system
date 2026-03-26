@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { IoSchool } from "react-icons/io5";
 import { BiSolidSchool, BiUser } from "react-icons/bi";
-import { MdDashboard, MdPersonAdd } from "react-icons/md";
+import { MdDashboard, MdPersonAdd, MdSwapHoriz, MdEventAvailable, MdClass } from "react-icons/md";
 import { FaChalkboardTeacher, FaUserTie } from "react-icons/fa";
 import { PiStudent } from "react-icons/pi";
 import { IoIosLogOut } from "react-icons/io";
@@ -13,10 +13,18 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  const selectedSchool = JSON.parse(localStorage.getItem("selectedSchool") || "null");
+
   const handleSignOut = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("selectedSchool");
     toast.success("Sign out successfully");
     navigate("/");
+  };
+
+  const handleSwitchSchool = () => {
+    localStorage.removeItem("selectedSchool");
+    navigate("/select-school");
   };
 
   const navLinkClass = ({ isActive }) =>
@@ -30,6 +38,8 @@ const AdminLayout = () => {
     { to: "/school", icon: <BiSolidSchool className="text-xl" />, label: "Schools" },
     { to: "/enrollment", icon: <MdPersonAdd className="text-xl" />, label: "Enrollment" },
     { to: "/students", icon: <PiStudent className="text-xl" />, label: "Students" },
+    { to: "/students/attendance", icon: <MdEventAvailable className="text-xl" />, label: "Attendance" },
+    { to: "/classes", icon: <MdClass className="text-xl" />, label: "Classes" },
     { to: "/staff", icon: <FaUserTie className="text-xl" />, label: "Staff" },
     { to: "/teachers", icon: <FaChalkboardTeacher className="text-xl" />, label: "Teachers" },
   ];
@@ -38,20 +48,35 @@ const AdminLayout = () => {
     <div className="flex min-h-screen bg-[#f0f4ff]">
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? "w-64" : "w-20"} fixed h-screen flex flex-col z-20 transition-all duration-300 bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a]`}>
-        {/* Logo */}
+        {/* Logo & Selected School */}
         <div className="flex gap-3 items-center p-4 border-b border-white/10">
           <div className="p-1.5 rounded-lg bg-blue-500/20 border border-blue-400/30 shrink-0 animate-pulse-glow">
             <IoSchool className="text-2xl text-blue-400" />
           </div>
           {sidebarOpen && (
-            <div className="animate-fade-in">
-              <h1 className="text-base font-bold text-white flex">
-                School<span className="text-blue-400">MS</span>
+            <div className="animate-fade-in min-w-0">
+              <h1 className="text-base font-bold text-white truncate">
+                {selectedSchool ? selectedSchool.schoolName : <>School<span className="text-blue-400">MS</span></>}
               </h1>
-              <p className="text-[10px] text-blue-300/50 font-medium tracking-wider uppercase">Admin Panel</p>
+              <p className="text-[10px] text-blue-300/50 font-medium tracking-wider uppercase">
+                {selectedSchool ? selectedSchool.schoolCode : "Admin Panel"}
+              </p>
             </div>
           )}
         </div>
+
+        {/* Switch School Button */}
+        {selectedSchool && (
+          <div className="px-3 mt-3">
+            <button
+              onClick={handleSwitchSchool}
+              className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-300/70 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
+            >
+              <MdSwapHoriz className="text-lg" />
+              {sidebarOpen && <span>Switch School</span>}
+            </button>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className="flex flex-col gap-1 px-3 mt-5 flex-1 overflow-y-auto">

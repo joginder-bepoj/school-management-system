@@ -206,7 +206,7 @@ const Login = () => {
                   localStorage.setItem("token", "demo-token");
                   const isNewUser = !localStorage.getItem("schoolSetupDone");
                   toast.success("Login Successful!");
-                  navigate(isNewUser ? "/setup" : "/dashboard");
+                  navigate(isNewUser ? "/setup" : "/select-school");
                 }, 600);
               }}
             >
