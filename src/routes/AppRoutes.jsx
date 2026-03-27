@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import AdminLayout from "../components/layout/AdminLayout";
 
 // Auth
@@ -142,11 +142,11 @@ const AnimatedRoutes = () => {
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Suspense fallback={<Loading />}>
         <AnimatedRoutes />
       </Suspense>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
