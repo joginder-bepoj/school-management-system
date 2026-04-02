@@ -1,5 +1,11 @@
 import { Suspense, lazy } from "react";
-import { HashRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  HashRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import AdminLayout from "../components/layout/AdminLayout";
 
 // Auth
@@ -8,16 +14,26 @@ const SchoolSetup = lazy(() => import("../pages/SchoolSetup"));
 
 // Lazy load pagest
 const SchoolSelector = lazy(() => import("../pages/SchoolSelector"));
-const AdminDashboard = lazy(() => import("../components/layout/AdminDashboard"));
+const AdminDashboard = lazy(
+  () => import("../components/layout/AdminDashboard"),
+);
 const School = lazy(() => import("../pages/School"));
+const SchoolProfile = lazy(() => import("../pages/SchoolProfile"));
 const Teachers = lazy(() => import("../pages/Teachers"));
+const TimeTable = lazy(() => import("../pages/TimeTable"));
 const AddSchools = lazy(() => import("../pages/AddSchools"));
 
 // Enrollment
-const EnrollmentDashboard = lazy(() => import("../pages/enrollment/EnrollmentDashboard"));
+const EnrollmentDashboard = lazy(
+  () => import("../pages/enrollment/EnrollmentDashboard"),
+);
 const NewInquiry = lazy(() => import("../pages/enrollment/NewInquiry"));
-const ApplicationForm = lazy(() => import("../pages/enrollment/ApplicationForm"));
-const ApplicationReview = lazy(() => import("../pages/enrollment/ApplicationReview"));
+const ApplicationForm = lazy(
+  () => import("../pages/enrollment/ApplicationForm"),
+);
+const ApplicationReview = lazy(
+  () => import("../pages/enrollment/ApplicationReview"),
+);
 
 // Students
 const StudentList = lazy(() => import("../pages/students/StudentList"));
@@ -36,6 +52,8 @@ const ClassProfile = lazy(() => import("../pages/classes/ClassProfile"));
 const StaffList = lazy(() => import("../pages/staff/StaffList"));
 const AddStaff = lazy(() => import("../pages/staff/AddStaff"));
 const StaffProfile = lazy(() => import("../pages/staff/StaffProfile"));
+const EditStaff = lazy(() => import("../pages/staff/EditStaff"));
+const DeleteStaff = lazy(() => import("../pages/staff/DeleteStaff"));
 
 // Animated loading spinner
 const Loading = () => (
@@ -44,7 +62,9 @@ const Loading = () => (
       <div className="w-12 h-12 rounded-full border-4 border-blue-100" />
       <div
         className="absolute inset-0 w-12 h-12 rounded-full border-4 border-transparent border-t-blue-500 border-r-blue-400"
-        style={{ animation: "spinGlow 1s cubic-bezier(0.4, 0, 0.2, 1) infinite" }}
+        style={{
+          animation: "spinGlow 1s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+        }}
       />
     </div>
     <div className="flex gap-1.5 mt-5">
@@ -52,11 +72,15 @@ const Loading = () => (
         <div
           key={i}
           className="w-2 h-2 rounded-full bg-blue-500"
-          style={{ animation: `dotPulse 1.4s ease-in-out ${i * 0.16}s infinite` }}
+          style={{
+            animation: `dotPulse 1.4s ease-in-out ${i * 0.16}s infinite`,
+          }}
         />
       ))}
     </div>
-    <p className="mt-3 text-sm font-medium text-slate-400 animate-pulse">Loading...</p>
+    <p className="mt-3 text-sm font-medium text-slate-400 animate-pulse">
+      Loading...
+    </p>
   </div>
 );
 
@@ -82,56 +106,256 @@ const AnimatedRoutes = () => {
   return (
     <Routes location={location} key={location.pathname}>
       {/* Auth Routes */}
-      <Route path="/login" element={
-        <PageTransition><Login /></PageTransition>
-      } />
-      <Route path="/setup" element={
-        <ProtectedRoute>
-          <PageTransition><SchoolSetup /></PageTransition>
-        </ProtectedRoute>
-      } />
+      <Route
+        path="/login"
+        element={
+          <PageTransition>
+            <Login />
+          </PageTransition>
+        }
+      />
+      <Route
+        path="/setup"
+        element={
+          <ProtectedRoute>
+            <PageTransition>
+              <SchoolSetup />
+            </PageTransition>
+          </ProtectedRoute>
+        }
+      />
 
       {/* School Selector — shown after login */}
-      <Route path="/select-school" element={
-        <ProtectedRoute>
-          <PageTransition><SchoolSelector /></PageTransition>
-        </ProtectedRoute>
-      } />
+      <Route
+        path="/select-school"
+        element={
+          <ProtectedRoute>
+            <PageTransition>
+              <SchoolSelector />
+            </PageTransition>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Dashboard Routes */}
-      <Route path="/" element={
-        <ProtectedRoute><AdminLayout /></ProtectedRoute>
-      }>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="/select-school" replace />} />
-        <Route path="dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
-        <Route path="school" element={<PageTransition><School /></PageTransition>} />
-        <Route path="add-school" element={<PageTransition><AddSchools /></PageTransition>} />
-        <Route path="teachers" element={<PageTransition><Teachers /></PageTransition>} />
+        <Route
+          path="dashboard"
+          element={
+            <PageTransition>
+              <AdminDashboard />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="school"
+          element={
+            <PageTransition>
+              <School />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="school-profile/:id"
+          element={
+            <PageTransition>
+              <SchoolProfile />
+            </PageTransition>
+          }
+        />
+
+        <Route
+          path="add-school"
+          element={
+            <PageTransition>
+              <AddSchools />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="timetable"
+          element={
+            <PageTransition>
+              <TimeTable />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="teachers"
+          element={
+            <PageTransition>
+              <Teachers />
+            </PageTransition>
+          }
+        />
 
         {/* Enrollment */}
-        <Route path="enrollment" element={<PageTransition><EnrollmentDashboard /></PageTransition>} />
-        <Route path="enrollment/new-inquiry" element={<PageTransition><NewInquiry /></PageTransition>} />
-        <Route path="enrollment/apply" element={<PageTransition><ApplicationForm /></PageTransition>} />
-        <Route path="enrollment/apply/:inquiryId" element={<PageTransition><ApplicationForm /></PageTransition>} />
-        <Route path="enrollment/review/:applicationId" element={<PageTransition><ApplicationReview /></PageTransition>} />
+        <Route
+          path="enrollment"
+          element={
+            <PageTransition>
+              <EnrollmentDashboard />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="enrollment/new-inquiry"
+          element={
+            <PageTransition>
+              <NewInquiry />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="enrollment/apply"
+          element={
+            <PageTransition>
+              <ApplicationForm />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="enrollment/apply/:inquiryId"
+          element={
+            <PageTransition>
+              <ApplicationForm />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="enrollment/review/:applicationId"
+          element={
+            <PageTransition>
+              <ApplicationReview />
+            </PageTransition>
+          }
+        />
 
         {/* Students */}
-        <Route path="students" element={<PageTransition><StudentList /></PageTransition>} />
-        <Route path="students/add" element={<PageTransition><AddStudent /></PageTransition>} />
-        <Route path="students/edit/:studentId" element={<PageTransition><EditStudent /></PageTransition>} />
-        <Route path="students/attendance" element={<PageTransition><StudentAttendance /></PageTransition>} />
-        <Route path="students/:studentId" element={<PageTransition><StudentProfile /></PageTransition>} />
+        <Route
+          path="students"
+          element={
+            <PageTransition>
+              <StudentList />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="students/add"
+          element={
+            <PageTransition>
+              <AddStudent />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="students/edit/:studentId"
+          element={
+            <PageTransition>
+              <EditStudent />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="students/attendance"
+          element={
+            <PageTransition>
+              <StudentAttendance />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="students/:studentId"
+          element={
+            <PageTransition>
+              <StudentProfile />
+            </PageTransition>
+          }
+        />
 
         {/* Classes */}
-        <Route path="classes" element={<PageTransition><ClassList /></PageTransition>} />
-        <Route path="classes/add" element={<PageTransition><AddClass /></PageTransition>} />
-        <Route path="classes/edit/:classId" element={<PageTransition><EditClass /></PageTransition>} />
-        <Route path="classes/:classId" element={<PageTransition><ClassProfile /></PageTransition>} />
+        <Route
+          path="classes"
+          element={
+            <PageTransition>
+              <ClassList />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="classes/add"
+          element={
+            <PageTransition>
+              <AddClass />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="classes/edit/:classId"
+          element={
+            <PageTransition>
+              <EditClass />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="classes/:classId"
+          element={
+            <PageTransition>
+              <ClassProfile />
+            </PageTransition>
+          }
+        />
 
-        {/* Staff */}
-        <Route path="staff" element={<PageTransition><StaffList /></PageTransition>} />
-        <Route path="staff/add" element={<PageTransition><AddStaff /></PageTransition>} />
-        <Route path="staff/:staffId" element={<PageTransition><StaffProfile /></PageTransition>} />
+
+        <Route
+          path="staff"
+          element={
+            <PageTransition>
+              <StaffList />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="staff/add"
+          element={
+            <PageTransition>
+              <AddStaff />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="staff/:staffId"
+          element={
+            <PageTransition>
+              <StaffProfile />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="staff/edit/:staffId"
+          element={
+            <PageTransition>
+              <EditStaff />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="staff/delete/:staffId"
+          element={
+            <PageTransition>
+              <DeleteStaff />
+            </PageTransition>
+          }
+        />
       </Route>
 
       {/* Catch all */}

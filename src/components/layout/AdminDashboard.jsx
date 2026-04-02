@@ -41,6 +41,7 @@ const AdminDashboard = () => {
 
   // Get selected school from localStorage
   const selectedSchool = JSON.parse(localStorage.getItem("selectedSchool") || "null");
+  console.log(selectedSchool);
 
   // If no school selected, redirect to school selector
   if (!selectedSchool) {

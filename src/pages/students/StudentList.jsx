@@ -243,21 +243,21 @@ const StudentList = () => {
                     <div className="flex items-center gap-1.5">
                       <Link
                         to={`/students/${student.id}`}
-                        className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 px-2.5 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-200"
+                        className="flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-2 rounded hover:text-blue-800 hover:bg-blue-200 transition-all duration-200 cursor-pointer"
                       >
-                        <FaEye /> View
+                        <FaEye />
                       </Link>
                       <Link
                         to={`/students/edit/${student.id}`}
-                        className="flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-800 px-2.5 py-1.5 bg-amber-50 rounded-lg hover:bg-amber-100 transition-all duration-200"
+                        className="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-2 rounded hover:text-amber-800 hover:bg-amber-200 transition-all duration-200 cursor-pointer"
                       >
-                        <MdEdit /> Edit
+                        <MdEdit />
                       </Link>
                       <button
                         onClick={() => handleDelete(student)}
-                        className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800 px-2.5 py-1.5 bg-red-50 rounded-lg hover:bg-red-100 transition-all duration-200 cursor-pointer"
+                        className="flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-100 px-2 py-2 rounded hover:text-red-800 hover:bg-red-200 transition-all duration-200 cursor-pointer"
                       >
-                        <MdDelete /> Delete
+                        <MdDelete />
                       </button>
                     </div>
                   </td>
